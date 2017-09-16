@@ -1,4 +1,4 @@
-from models import *
+from database import *
 from bs4 import BeautifulSoup, NavigableString
 from datetime import date, datetime
 import requests
@@ -10,17 +10,12 @@ if sys.platform == 'win32':
 else:
     locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
-sql_debug(True)
-db.bind(provider='postgres', user='postgres', password='', host='', database='nikita')
-db.generate_mapping(create_tables=True, check_tables=False)
-# db.drop_all_tables(with_all_data=True)
-# exit()
-
 site = 'http://m.rksi.ru'
 groupsHtml = BeautifulSoup(
     requests.post(site).text,
     'html.parser'
 ).find('select', {'name': 'group'}).findAll('option')
+
 
 def parse_prefix(line, fmt):
     try:
@@ -33,6 +28,7 @@ def parse_prefix(line, fmt):
             raise
     return t
 
+
 for group_name in groupsHtml:
     group_name = group_name.text
 
@@ -40,8 +36,7 @@ for group_name in groupsHtml:
         if len(Group.select(lambda x: x.name == group_name)) == 0:
             Group.create(group_name)
 
-    siteHtml = requests.post('http://m.rksi.ru',
-                             {'group': group_name.encode('cp1251'), 'stt': u'Показать!'.encode('cp1251')})
+    siteHtml = requests.post(site, {'group': group_name.encode('cp1251'), 'stt': u'Показать!'.encode('cp1251')})
 
     data = siteHtml.text
 
@@ -51,7 +46,6 @@ for group_name in groupsHtml:
 
     lessons = []
     lessonIndex = 0
-
 
     for tag in content.children:
         if tag.name == 'h3' or tag.name == 'form' or tag.name == 'br' or type(tag) is NavigableString:
@@ -98,10 +92,3 @@ for group_name in groupsHtml:
                     name = lessonInfo.text
             Lesson.create(name, lecturer, audience, dt, time, group_name)
             classedLesson = []
-
-
-with db_session:
-    all_tables = Lesson.select()[:]
-    print(all_tables)
-    pass
-
