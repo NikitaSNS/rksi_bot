@@ -42,14 +42,26 @@ def handle_text(message):
 
 @bot.message_handler(content_types=["text"])
 def repeat_all_messages(message):
+
+    #next_handler - отличная идея чтобы не писать кучу условий
+
     group = [g for g in all_groups if g.name == message.text]
     if len(group) != 0:
         group = group[0]
         response = ''
-        for lesson in group.lessons:
-            response += lesson.time + '<br>'
+        with db_session:
+            lessons = Lesson.select(lambda l: l.group.name == group.name).order_by(Lesson.date)[:]
 
-        bot.send_message(message.chat.id, response)
+        day = lessons[-1].date
+
+        for lesson in lessons:
+            if day != lesson.date:
+                day = lesson.date
+                response += '<b>' + str(day) + '</b>\n'
+            response += lesson.time + '\n' + lesson.name + '\n' \
+                        + lesson.lecturer + ', ' + 'ауд. ' + lesson.audience + '\n\n'
+
+        bot.send_message(message.chat.id, response, parse_mode='html')
         pass
 
     bot.send_message(message.chat.id, message.text)
