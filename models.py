@@ -3,7 +3,7 @@ from pony.orm import *
 
 db = Database()
 
-sql_debug(True)
+# sql_debug(True)
 
 # db.bind(provider='postgres', user='nikita', password='', host='', database='template1')
 
@@ -24,7 +24,7 @@ class Lesson(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Optional(str)
     lecturer = Optional(str)
-    audience = Optional(int)
+    audience = Optional(str)
     date = Optional(date)
     time = Optional(str)
     group = Required(Group)
