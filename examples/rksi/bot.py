@@ -58,9 +58,10 @@ def repeat_all_messages(message):
             if day != lesson.date:
                 day = lesson.date
                 response += '<b>' + str(day) + '</b>\n'
-            response += lesson.time + '\n' + lesson.name + '\n' \
-                        + lesson.lecturer + ', ' + 'ауд. ' + lesson.audience + '\n\n'
 
+            response += 'id: ' + lesson.time + '\n' + lesson.name + '\n' \
+                        + lesson.lecturer + ', ' + 'ауд. ' + lesson.audience + '\n\n'
+            # maybe "", {} {}{}, less.time ???
         bot.send_message(message.chat.id, response, parse_mode='html')
         pass
 
